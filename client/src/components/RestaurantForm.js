@@ -7,6 +7,7 @@ export default class RestaurantForm extends Component {
   state = {
     name: "",
     address: "",
+    message:"",
     phone: "",
     email: "",
     googleassistant: false,
@@ -43,7 +44,7 @@ export default class RestaurantForm extends Component {
     const uploadData = new FormData();
     uploadData.append("menu", menuFile);
 
-    axios.post("/api/add-image/menu", uploadData).then(response => {
+    axios.post("/api/v2/add-image/menu", uploadData).then(response => {
       const menu = response.data.secure_url;
       this.setState({ menu: menu });
     });
@@ -56,7 +57,7 @@ export default class RestaurantForm extends Component {
     const uploadData = new FormData();
     uploadData.append("logo", logoFile);
 
-    axios.post("/api/add-image/logo", uploadData).then(response => {
+    axios.post("/api/v2/add-image/logo", uploadData).then(response => {
       const logo = response.data.secure_url;
       this.setState({ logo: logo });
     });
@@ -112,9 +113,6 @@ export default class RestaurantForm extends Component {
       {
         [name]: check
       }
-      // () => {
-      //   console.log("#######OPTINSTATE : ", this.state);
-      // }
     );
   };
 
@@ -162,11 +160,12 @@ export default class RestaurantForm extends Component {
       tables,
       openingtimes,
       menu,
-      logo
+      logo,
+      message
     } = this.state;
 
     axios
-      .post("/api/restaurants", {
+      .post("/api/v2/restaurants", {
         name,
         address,
         phone,
@@ -178,10 +177,18 @@ export default class RestaurantForm extends Component {
         tables,
         openingtimes,
         menu,
-        logo
+        logo,
+        message
       })
-      .then(data => {
-        this.props.history.push("/");
+      .then(res => {
+        if (res.data.message) {
+          this.setState({
+            message: res.data.message
+          });
+        }else{
+
+          this.props.history.push("/");
+        } 
       })
       .catch(err => {
         console.log(err);
@@ -189,6 +196,7 @@ export default class RestaurantForm extends Component {
   };
 
   render() {
+    
     return (
       <>
         <h2 className="rest-form-header">Restaurant Information</h2>
@@ -433,10 +441,14 @@ export default class RestaurantForm extends Component {
               </p>
             </div>
           )}
+            {this.state.message && (
+              <p className="auth-message">{this.state.message}</p>
+            )}
           <button className="edit-button rest-form-button" type="submit">
             Submit
           </button>
         </form>
+       
       </>
     );
   }
